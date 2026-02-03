@@ -1,24 +1,40 @@
 import { View, Text, Button, Alert } from "react-native";
 import { supabase } from "@/lib/supabase";
-import { router } from "expo-router";
+import { useEffect, useState } from "react";
 
 export default function Profile() {
-  async function handleLogout() {
+  const [email, setEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    const user = supabase.auth.getUser().then(({ data }) => {
+      setEmail(data.user?.email ?? null);
+    });
+  }, []);
+
+  async function logout() {
     const { error } = await supabase.auth.signOut();
     if (error) {
-      Alert.alert("Error", error.message);
-      return;
+      Alert.alert("Logout failed", error.message);
     }
-
-    // Redirect to login after logout
-    router.replace("/login");
+    // RootLayout will auto-redirect
   }
 
   return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Text style={{ fontSize: 24, marginBottom: 20 }}>Profile</Text>
+    <View
+      style={{
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 20,
+      }}
+    >
+      <Text style={{ fontSize: 24, marginBottom: 12 }}>Profile</Text>
 
-      <Button title="Logout" onPress={handleLogout} color="red" />
+      <Text style={{ fontSize: 16, marginBottom: 30 }}>
+        {email ? `Logged in as\n${email}` : "Loading user..."}
+      </Text>
+
+      <Button title="Logout" color="red" onPress={logout} />
     </View>
   );
 }

@@ -1,8 +1,17 @@
+// context/AuthContext.tsx
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Session } from "@supabase/supabase-js";
 
-const AuthContext = createContext<any>(null);
+type AuthContextType = {
+  session: Session | null;
+  loading: boolean;
+};
+
+const AuthContext = createContext<AuthContextType>({
+  session: null,
+  loading: true,
+});
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
@@ -20,9 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
 
-    return () => {
-      listener.subscription.unsubscribe();
-    };
+    return () => listener.subscription.unsubscribe();
   }, []);
 
   return (
